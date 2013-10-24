@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="choose_the_verb">Choose the verb</string>
     <string name="go">GO</string>
+    <string name="download_new_verb">Download new verb</string>
 
 </resources>
