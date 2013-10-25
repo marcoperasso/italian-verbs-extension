@@ -26,7 +26,7 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener 
 		setTitle(R.string.download_new_verb);
 	
 		findViewById(R.id.buttonGo).setOnClickListener(this);
-
+		findViewById(R.id.buttonCancel).setOnClickListener(this);
 		mEditVerb = ((AutoCompleteTextView) findViewById(R.id.editTextVerb));
 		VerbsAutoCompleteAdapter adapter = new VerbsAutoCompleteAdapter(this,
 				android.R.layout.simple_dropdown_item_1line);
@@ -36,7 +36,12 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener 
 
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.buttonGo) {
+		if (v.getId() == R.id.buttonCancel) {
+			Intent intent = new Intent();
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		}
+		else if (v.getId() == R.id.buttonGo) {
 			Editable name = mEditVerb.getText();
 			Bundle data = new Bundle();
 			CharSequence[] lines = new CharSequence[96];

@@ -14,7 +14,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Light.NoTitleBar.Workaround" >
+        android:theme="@style/Theme.Light.Panel.Workaround" >
         <activity
             android:name="perassoft.italianverbsextension.VerbDownloaderActivity"
             android:label="@string/app_name" >
