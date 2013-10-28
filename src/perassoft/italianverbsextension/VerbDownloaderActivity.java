@@ -10,11 +10,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Base64;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
-public class VerbDownloaderActivity extends Activity implements OnClickListener {
+public class VerbDownloaderActivity extends Activity implements OnClickListener, OnEditorActionListener {
 
 	private AutoCompleteTextView mEditVerb;
 
@@ -23,7 +27,7 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_verb_downloader);
 		setTitle(R.string.download_new_verb);
-	
+
 		findViewById(R.id.buttonGo).setOnClickListener(this);
 		findViewById(R.id.buttonCancel).setOnClickListener(this);
 		mEditVerb = ((AutoCompleteTextView) findViewById(R.id.editTextVerb));
@@ -31,6 +35,8 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener 
 				android.R.layout.simple_dropdown_item_1line);
 
 		mEditVerb.setAdapter(adapter);
+		mEditVerb.setOnEditorActionListener(this);
+		mEditVerb.setImeOptions(EditorInfo.IME_ACTION_DONE);
 	}
 
 	@Override
@@ -39,36 +45,52 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener 
 			Intent intent = new Intent();
 			setResult(RESULT_CANCELED, intent);
 			finish();
-		}
-		else if (v.getId() == R.id.buttonGo) {
-			Editable name = mEditVerb.getText();
-			Bundle data = new Bundle();
-			CharSequence[] lines = new CharSequence[96];
-			int i = 0;
-			boolean error = false;
-			try {
-				byte[] p = name.toString().getBytes("UTF-8");
-				String base64 = Base64.encodeToString(p, Base64.DEFAULT);
-	    		URL url = new URL("http://www.ecommuters.com/verbs/get/" + base64);
-				InputStream openStream = url.openStream();
-				BufferedReader reader;
-				reader = new BufferedReader(new InputStreamReader(openStream));
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					lines[i] = line;
-					i++;
-				}
-			} catch (Exception e) {
-				data.putString("ERROR", e.getMessage());
-				error = true;
-			}
-			data.putCharSequenceArray("VERB", lines);
-			Intent intent = new Intent();
-			intent.putExtras(data);
-			setResult(error ? RESULT_CANCELED : RESULT_OK, intent);
-			finish();
+		} else if (v.getId() == R.id.buttonGo) {
+			download();
 		}
 
+	}
+
+	private void download() {
+		Editable name = mEditVerb.getText();
+		Bundle data = new Bundle();
+		CharSequence[] lines = new CharSequence[96];
+		int i = 0;
+		boolean error = false;
+		try {
+			byte[] p = name.toString().getBytes("UTF-8");
+			String base64 = Base64.encodeToString(p, Base64.DEFAULT);
+			URL url = new URL("http://www.ecommuters.com/verbs/get/" + base64);
+			InputStream openStream = url.openStream();
+			BufferedReader reader;
+			reader = new BufferedReader(new InputStreamReader(openStream));
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				lines[i] = line;
+				i++;
+			}
+		} catch (Exception e) {
+			data.putString("ERROR", e.getMessage());
+			error = true;
+		}
+		data.putCharSequenceArray("VERB", lines);
+		Intent intent = new Intent();
+		intent.putExtras(data);
+		setResult(error ? RESULT_CANCELED : RESULT_OK, intent);
+		finish();
+	}
+
+	@Override
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		if (actionId == EditorInfo.IME_ACTION_DONE
+				|| (event.getAction() == KeyEvent.ACTION_DOWN && event
+						.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+
+			download();
+
+			return true;
+		}
+		return false;
 	}
 
 }
