@@ -4,5 +4,6 @@
     <string name="app_name">Italian Verbs Extension</string>
     <string name="choose_the_verb">Choose the verb</string>
     <string name="download_new_verb">Download new verb</string>
+    <string name="please_wait">Please wait&#8230;</string>
 
 </resources>

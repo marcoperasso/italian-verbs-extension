@@ -4,5 +4,6 @@
     <string name="app_name">Estensione per Verbi Italiani</string>
     <string name="choose_the_verb">Scegli il verbo</string>
     <string name="download_new_verb">Scarica nuovo verbo</string>
+    <string name="please_wait">Prego attendere&#8230;</string>
 
 </resources>

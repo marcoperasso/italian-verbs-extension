@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -55,11 +57,19 @@ public class VerbDownloaderActivity extends Activity implements
 
 	private void download() {
 		Editable name = mEditVerb.getText();
+		final ProgressDialog progressBar = new ProgressDialog(this);
+		progressBar.setCancelable(false);
+		progressBar.setIndeterminate(true);
+		progressBar.setMessage(getString(R.string.please_wait));
+		
+		progressBar.show();
+
 		new AsyncTask<String, Void, DownloadResult>() {
 			protected void onPostExecute(DownloadResult result) {
 				Intent intent = new Intent();
 				intent.putExtras(result.data);
 				setResult(result.error ? RESULT_CANCELED : RESULT_OK, intent);
+				progressBar.dismiss();
 				finish();
 			}
 
