@@ -7,6 +7,7 @@ import java.net.URL;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Base64;
@@ -18,7 +19,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-public class VerbDownloaderActivity extends Activity implements OnClickListener, OnEditorActionListener {
+public class VerbDownloaderActivity extends Activity implements
+		OnClickListener, OnEditorActionListener {
 
 	private AutoCompleteTextView mEditVerb;
 
@@ -53,31 +55,43 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener,
 
 	private void download() {
 		Editable name = mEditVerb.getText();
-		Bundle data = new Bundle();
-		CharSequence[] lines = new CharSequence[96];
-		int i = 0;
-		boolean error = false;
-		try {
-			byte[] p = name.toString().getBytes("UTF-8");
-			String base64 = Base64.encodeToString(p, Base64.DEFAULT);
-			URL url = new URL("http://www.ecommuters.com/verbs/get/" + base64);
-			InputStream openStream = url.openStream();
-			BufferedReader reader;
-			reader = new BufferedReader(new InputStreamReader(openStream));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				lines[i] = line;
-				i++;
+		new AsyncTask<String, Void, DownloadResult>() {
+			protected void onPostExecute(DownloadResult result) {
+				Intent intent = new Intent();
+				intent.putExtras(result.data);
+				setResult(result.error ? RESULT_CANCELED : RESULT_OK, intent);
+				finish();
 			}
-		} catch (Exception e) {
-			data.putString("ERROR", e.getMessage());
-			error = true;
-		}
-		data.putCharSequenceArray("VERB", lines);
-		Intent intent = new Intent();
-		intent.putExtras(data);
-		setResult(error ? RESULT_CANCELED : RESULT_OK, intent);
-		finish();
+
+			@Override
+			protected DownloadResult doInBackground(String... params) {
+				DownloadResult result = new DownloadResult();
+				result.data = new Bundle();
+				CharSequence[] lines = new CharSequence[96];
+				int i = 0;
+				try {
+					byte[] p = params[0].getBytes("UTF-8");
+					String base64 = Base64.encodeToString(p, Base64.DEFAULT);
+					URL url = new URL("http://www.ecommuters.com/verbs/get/"
+							+ base64);
+					InputStream openStream = url.openStream();
+					BufferedReader reader;
+					reader = new BufferedReader(new InputStreamReader(
+							openStream));
+					String line = null;
+					while ((line = reader.readLine()) != null) {
+						lines[i] = line;
+						i++;
+					}
+				} catch (Exception e) {
+					result.data.putString("ERROR", e.getMessage());
+					result.error = true;
+				}
+				result.data.putCharSequenceArray("VERB", lines);
+				return result;
+			};
+		}.execute(name.toString());
+
 	}
 
 	@Override
@@ -93,4 +107,8 @@ public class VerbDownloaderActivity extends Activity implements OnClickListener,
 		return false;
 	}
 
+	class DownloadResult {
+		Bundle data;
+		boolean error;
+	}
 }
